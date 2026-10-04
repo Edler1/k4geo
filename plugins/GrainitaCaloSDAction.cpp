@@ -318,7 +318,7 @@ namespace sim {
         Geant4Calorimeter::Hit::Contribution contrib;
         contrib.trackID = aStep->GetTrack()->GetTrackID();
         contrib.pdgID = aStep->GetTrack()->GetParticleDefinition()->GetPDGEncoding();
-        contrib.deposit = aStep->GetTotalEnergyDeposit();
+        contrib.deposit = step_E;
         // contrib.deposit = step_E;
         contrib.time = aStep->GetPreStepPoint()->GetGlobalTime();
         contrib.x = global.x();
