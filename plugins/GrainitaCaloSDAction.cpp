@@ -22,7 +22,6 @@
  */
 
 #include "GrainitaCaloSDAction.h"
-// #include "detectorSegmentations/FCCSWModularGridRhoPhiTheta_k4geo.h"
 #include "DD4hep/Segmentations.h"
 #include "DDG4/Factories.h"
 #include "DDG4/Geant4GeneratorAction.h"
@@ -134,8 +133,7 @@ namespace sim {
 
     auto cellID = m_segmentation->cellID(glob, glob, VolID);
     auto hitpos_dd4hep = m_segmentation->position(cellID); // in cm
-    G4ThreeVector HitCellPos(hitpos_dd4hep.x() / dd4hep::millimeter,
-                             hitpos_dd4hep.y() / dd4hep::millimeter,
+    G4ThreeVector HitCellPos(hitpos_dd4hep.x() / dd4hep::millimeter, hitpos_dd4hep.y() / dd4hep::millimeter,
                              hitpos_dd4hep.z() / dd4hep::millimeter);
 
     Geant4HitCollection* rawColl = collection(m_userData.rawCollectionID);
@@ -188,16 +186,12 @@ namespace sim {
     std::vector<G4ThreeVector> cellPosVec;
     std::vector<G4double> responseVec;
 
-    auto dd4hepPositionToG4 = [](const dd4hep::DDSegmentation::Vector3D& pos) {
-      return G4ThreeVector(pos.X * dd4hep::centimeter / dd4hep::millimeter,
-                           pos.Y * dd4hep::centimeter / dd4hep::millimeter,
-                           pos.Z * dd4hep::centimeter / dd4hep::millimeter);
-    };
-
     auto addCell = [&](CellID id) {
       auto pos = m_segmentation->position(id);
       cellIDvec.push_back(id);
-      cellPosVec.push_back(dd4hepPositionToG4(pos));
+      // Unit conversion from cm to mm.
+      cellPosVec.push_back(
+          G4ThreeVector(pos.X / dd4hep::millimeter, pos.Y / dd4hep::millimeter, pos.Z / dd4hep::millimeter));
     };
 
     addCell(cellID);
@@ -234,10 +228,6 @@ namespace sim {
     // Note: keep cell id for future development: modular segmentation.
     auto transverseDistance = [&]([[maybe_unused]] CellID id, const G4ThreeVector& cellPos) {
       G4ThreeVector axis = cellPos.unit();
-      // if (modularSeg) {
-      //   auto fiberDir = modularSeg->fiberDirection(id);
-      //   axis = G4ThreeVector(fiberDir.X, fiberDir.Y, fiberDir.Z).unit();
-      // }
       G4ThreeVector rel = global - cellPos;
       G4double transverse2 = rel.mag2() - rel.dot(axis) * rel.dot(axis);
 
