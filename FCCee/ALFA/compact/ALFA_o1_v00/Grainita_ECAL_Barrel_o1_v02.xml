@@ -37,7 +37,7 @@
     <!-- Module -->
     <constant name="FrameThickness"       value="10*mm"/>
     <constant name="SegThickness"         value="2.5*mm"/>
-    <constant name="ModuleTiltAngle"      value="1.5"/>       <!-- Angle in IP, Unit in degree -->
+    <constant name="ModuleTiltAngle"      value="1.5*deg"/>
 
     <!-- Cell -->
     <constant name="rho0"                 value="FrameThickness"/>   
