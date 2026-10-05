@@ -24,21 +24,10 @@ static Ref_t create_detector(Detector& description, xml_h e, SensitiveDetector s
   std::string det_name = x_det.nameStr();
   std::cout << "--> Going to create " << det_name << ", with ID: " << x_det.id() << std::endl;
 
-  // xml_dim_t x_dim = x_det.dimensions();
-  // const double CaloX = x_dim.x();
-  // const double CaloY = x_dim.y();
-  // const double CaloZ = x_dim.z();
-
-  // Define readout
-  // Readout readout = sens.readout();
-  // Segmentation seg = readout.segmentation();
-
   // Define material
   Material air(description.material("Air"));
   Material MatCarbonfiber(description.material("CarbonFiber"));
   Material MatCrystal(description.material(x_det.attr<std::string>(_U(material))));
-  // Material  MatWLSfiber(description.material("WLSFiber"));
-  // Material  MatPMMAcladding(description.material("PMMA"));
 
   // Detector global size
   auto innerR = description.constant<double>("InnerRadius");
@@ -141,7 +130,7 @@ static Ref_t create_detector(Detector& description, xml_h e, SensitiveDetector s
   // ======== Define a sector (backspace is included in sector)======== //
   double innerR_sector = innerR + Cframe_thick;
   double outerR_sector = (innerR_sector + crystal_thick + back_space) / cos(dphi_sec / 2.);
-  ;
+  
   halfZ_out = outerR_sector * cos(dphi_sec / 2.) / tan(atan(innerR_sector / halfZ) - module_tilt);
   std::cout << "  halfZ out = " << outerR_sector * cos(dphi_sec / 2.) << " / tan("
             << atan(innerR_sector / halfZ) - module_tilt << ") = " << halfZ_out << std::endl;
