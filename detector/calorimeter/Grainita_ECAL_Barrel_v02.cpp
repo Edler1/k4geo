@@ -51,7 +51,6 @@ static Ref_t create_detector(Detector& description, xml_h e, SensitiveDetector s
   auto Cframe_thick = description.constant<double>("FrameThickness");
   auto Cseg_thick = description.constant<double>("SegThickness");
   auto module_tilt = description.constant<double>("ModuleTiltAngle"); // Unit in degree
-  double module_tilt_rad = module_tilt * M_PI / 180.;
 
   // auto fiber_r = description.constant<double>("FiberRadius");
   // auto cladding_thick = description.constant<double>("CladdingThickness");
