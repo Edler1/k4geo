@@ -30,6 +30,7 @@
 
   <comment> Global detector dimensions </comment>
   <include ref="DetDimension_ALFA_o1_v00.xml" />
+  <include ref="display.xml" />
 
 
   <comment> Tracker bitfield </comment>
