@@ -29,6 +29,7 @@
 #include "DDG4/Geant4Mapping.h"
 #include "DDG4/Geant4SensDetAction.inl"
 #include "detectorSegmentations/FCCSWGridPhiTheta_k4geo.h"
+#include "detectorSegmentations/FCCSWGridRhoPhiTheta_k4geo.h"
 
 #include "G4EmProcessSubType.hh"
 #include "G4OpticalPhoton.hh"
@@ -37,6 +38,7 @@
 #include "G4VProcess.hh"
 #include <algorithm>
 #include <cmath>
+#include <limits>
 #include <numeric>
 #include <vector>
 
@@ -172,6 +174,11 @@ namespace sim {
             ? static_cast<int>(std::floor((-M_PI + 0.5 * phiThetaSeg->gridSizePhi() - phiThetaSeg->offsetPhi()) /
                                           phiThetaSeg->gridSizePhi()))
             : 0;
+    // Theta is not periodic: restrict neighbours to the physical theta coverage of the segmentation.
+    auto rhoPhiThetaSeg =
+        dynamic_cast<const dd4hep::DDSegmentation::FCCSWGridRhoPhiTheta_k4geo*>(m_segmentation->segmentation);
+    const int firstThetaID = rhoPhiThetaSeg ? rhoPhiThetaSeg->firstThetaBin() : std::numeric_limits<int>::min();
+    const int lastThetaID = rhoPhiThetaSeg ? rhoPhiThetaSeg->lastThetaBin() : std::numeric_limits<int>::max();
     const int currentPhiID = static_cast<int>(decoder->get(cellID, phiIndex));
     const int currentThetaID = static_cast<int>(decoder->get(cellID, thetaIndex));
     const int neighborSize = std::max(1, m_userData.neighborCellSize);
@@ -212,6 +219,9 @@ namespace sim {
           }
 
           const int neighborThetaID = currentThetaID + dTheta;
+          if (neighborThetaID < firstThetaID || neighborThetaID > lastThetaID) {
+            continue;
+          }
 
           CellID neighborCellID = cellID;
           decoder->set(neighborCellID, phiIndex, neighborPhiID);

@@ -129,6 +129,16 @@ namespace DDSegmentation {
       return m_offsetR / std::sin(m_theta) + 0.5 * (m_rhoBins[rhoValue] + m_rhoBins[rhoValue + 1]);
   }
 
+  int FCCSWGridRhoPhiTheta_k4geo::firstThetaBin() const {
+    const auto& thetaField = (*decoder())[m_thetaIndex];
+    return std::max(positionToBin(m_minTheta, gridSizeTheta(), offsetTheta()), static_cast<int>(thetaField.minValue()));
+  }
+
+  int FCCSWGridRhoPhiTheta_k4geo::lastThetaBin() const {
+    const auto& thetaField = (*decoder())[m_thetaIndex];
+    return std::min(positionToBin(m_maxTheta, gridSizeTheta(), offsetTheta()), static_cast<int>(thetaField.maxValue()));
+  }
+
   // overrides the DDSegmentation::Segmentation::neighbours method
   void FCCSWGridRhoPhiTheta_k4geo::neighbours(const CellID& cID, std::set<CellID>& neighbours) const {
     const int phiBin = static_cast<int>(decoder()->get(cID, m_phiIndex));
@@ -157,13 +167,10 @@ namespace DDSegmentation {
     // Theta is not periodic.  Use the bins reached by points at the detector
     // boundaries rather than testing bin centres: the first/last physical
     // cells can have centres just outside the boundary.
-    const auto& thetaField = (*decoder())[m_thetaIndex];
-    const int firstThetaBin =
-        std::max(positionToBin(m_minTheta, gridSizeTheta(), offsetTheta()), static_cast<int>(thetaField.minValue()));
-    const int lastThetaBin =
-        std::min(positionToBin(m_maxTheta, gridSizeTheta(), offsetTheta()), static_cast<int>(thetaField.maxValue()));
+    const int minThetaBin = firstThetaBin();
+    const int maxThetaBin = lastThetaBin();
     for (const int candidate : {thetaBin - 1, thetaBin + 1}) {
-      if (candidate >= firstThetaBin && candidate <= lastThetaBin)
+      if (candidate >= minThetaBin && candidate <= maxThetaBin)
         neighbours.insert(withBin(m_thetaIndex, candidate));
     }
 

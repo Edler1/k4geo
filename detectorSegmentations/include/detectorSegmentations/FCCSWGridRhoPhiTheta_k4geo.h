@@ -44,6 +44,10 @@ namespace DDSegmentation {
      */
     virtual void neighbours(const CellID& cellID, std::set<CellID>& neighbours) const override;
 
+    /// First/last theta bin inside the physical coverage [min_theta, max_theta] (and the theta field range).
+    int firstThetaBin() const;
+    int lastThetaBin() const;
+
     /**  Find neighbours of the cell.
      *   Definition of neighbours is explained on slide 9:
      * https://indico.cern.ch/event/1475808/contributions/6219554/attachments/2966253/5218774/FCC_FullSim_HCal_slides.pdf
