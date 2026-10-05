@@ -11,26 +11,21 @@
      #
      #==========================================================================
 -->
-  <info name="Grainita_ECAL_Barrel_v02"
+  <!-- <info name="Grainita_ECAL_Barrel_v02"
     title="Grainita ECAL full detector geometry (first ver.)"
     author="Fangyi Guo"
     url="None"
     status="development"
     version="0.1">
-    <comment></comment>
-  </info>
+  </info> -->
 
   <define>
-    <constant name="world_size" value="10*m"/>
-    <constant name="world_x" value="world_size"/>
-    <constant name="world_y" value="world_size"/>
-    <constant name="world_z" value="world_size"/>
 
     <!-- Global structure -->
-    <constant name="InnerRadius"          value="220*cm"/>
+    <constant name="InnerRadius"          value="ECalBarrel_inner_radius"/>
     <constant name="CrystalThickness"     value="40.5*cm"/>
     <constant name="BackSpace"            value="1.8*cm"/>
-    <constant name="HalfZ"                value="230*cm"/>
+    <constant name="HalfZ"                value="ECalBarrel_half_length"/>
     <constant name="NumberOfPhiSectors"   value="72"/>
     <constant name="NumberOfZModules"     value="15"/>
 
@@ -46,11 +41,6 @@
 
 
   </define>
-
-  <includes>
-    <gdmlFile  ref="elements.xml"/>
-    <gdmlFile  ref="materials.xml"/>
-  </includes>
   
 
   <!-- Define visualization attributes. Vis attributes contains an
@@ -81,14 +71,16 @@
   </detectors>
 
 
-
+  <!-- Segmentation to achieve readout granularity of 7 mm in frout of ECAL barrel surface.
+  It corresponds to deltaPhi = deltaTheta = 3.2 mrad, so phi_bins = 2pi/3.2mrad = 1975. 
+  Two longitudinal segmentations are achieved from short-long fiber structure.  -->
   <readouts>
     <readout name="GrainitaEcalBarrelRO">
       <segmentation type="FCCSWGridRhoPhiTheta_k4geo"
               phi_bins="1975"
               grid_size_theta="0.0032"
-              grid_rho="(CrystalThickness+10*mm)/4."
-              rho_bin_count="4"
+              rho_bins="rho0 rho1 rho2"
+              rho_bin_count="2"
               min_theta="atan((InnerRadius+FrameThickness)/HalfZ)"
               max_theta="pi-atan((InnerRadius+FrameThickness)/HalfZ)"
               clear_extra_fields="1"

@@ -50,7 +50,7 @@ static Ref_t create_detector(Detector& description, xml_h e, SensitiveDetector s
 
   auto Cframe_thick = description.constant<double>("FrameThickness");
   auto Cseg_thick = description.constant<double>("SegThickness");
-  auto module_tilt = description.constant<double>("ModuleTiltAngle"); // Unit in degree
+  auto module_tilt = description.constant<double>("ModuleTiltAngle"); 
 
   // auto fiber_r = description.constant<double>("FiberRadius");
   // auto cladding_thick = description.constant<double>("CladdingThickness");
@@ -86,13 +86,13 @@ static Ref_t create_detector(Detector& description, xml_h e, SensitiveDetector s
   */
 
   // Slope and intercept of line AB
-  double tmp_slope1 = -(outerR * sin(dphi_sec / 2. - module_tilt_rad) - innerR * tan(dphi_sec / 2.)) /
-                      (outerR * cos(dphi_sec / 2. - module_tilt_rad) - innerR);
+  double tmp_slope1 = -(outerR * sin(dphi_sec / 2. - module_tilt) - innerR * tan(dphi_sec / 2.)) /
+                      (outerR * cos(dphi_sec / 2. - module_tilt) - innerR);
   double tmp_intercept1 = -innerR * tan(dphi_sec / 2) - innerR * tmp_slope1;
 
   // Slope and intercept of line DC
-  double tmp_slope2 = (outerR * sin(dphi_sec / 2 + module_tilt_rad) - innerR * tan(dphi_sec / 2)) /
-                      (outerR * cos(dphi_sec / 2 + module_tilt_rad) - innerR);
+  double tmp_slope2 = (outerR * sin(dphi_sec / 2 + module_tilt) - innerR * tan(dphi_sec / 2)) /
+                      (outerR * cos(dphi_sec / 2 + module_tilt) - innerR);
   double tmp_intercept2 = innerR * tan(dphi_sec / 2) - innerR * tmp_slope2;
 
   // Calculate the shift regarding to the non-tilt point (Rout, +-dphi_sec/2.).
@@ -101,18 +101,18 @@ static Ref_t create_detector(Detector& description, xml_h e, SensitiveDetector s
   double shift_phi_pos =
       fabs(fabs(tmp_slope2 * outerR * cos(dphi_sec / 2.) + tmp_intercept2) - outerR * sin(dphi_sec / 2.));
 
-  std::cout << "-- Consider a tilt angle in phi to avoid pointing cracks. Tilt angle (in deg): " << module_tilt
-            << ", in rad: " << module_tilt_rad << std::endl;
+  std::cout << "-- Consider a tilt angle in phi to avoid pointing cracks. Tilt angle (in deg): " << module_tilt*180./TMath::Pi()
+            << ", in rad: " << module_tilt << std::endl;
   std::cout << "Input vars: Rin " << innerR << ", Rout " << outerR << ", phi " << dphi_sec / 2. << ", delta "
-            << module_tilt_rad << std::endl;
+            << module_tilt << std::endl;
   std::cout << "  Calculate the new boundary lines: " << std::endl;
   std::cout << "    in -y side: k = " << tmp_slope1 << ", b = " << tmp_intercept1 << std::endl;
   std::cout << "    in +y side: k = " << tmp_slope2 << ", b = " << tmp_intercept2 << std::endl;
   std::cout << "  Calculated +y direction shift: " << shift_phi_pos << std::endl;
   std::cout << "  Calculated -y direction shift: " << shift_phi_neg << std::endl;
-  double halfZ_out = outerR * cos(dphi_sec / 2.) / tan(atan(innerR / halfZ) - module_tilt_rad);
+  double halfZ_out = outerR * cos(dphi_sec / 2.) / tan(atan(innerR / halfZ) - module_tilt);
   double tilt_rad = atan((outerR * sin(dphi_sec / 2.) + shift_phi_pos) / (outerR * cos(dphi_sec / 2.)));
-  std::cout << "  halfZ out = " << outerR * cos(dphi_sec / 2.) << " / tan(" << atan(innerR / halfZ) - module_tilt_rad
+  std::cout << "  halfZ out = " << outerR * cos(dphi_sec / 2.) << " / tan(" << atan(innerR / halfZ) - module_tilt
             << ") " << std::endl;
   outerR = sqrt(pow(outerR * cos(dphi_sec / 2.), 2) + pow((outerR * sin(dphi_sec / 2.) + shift_phi_pos), 2));
   std::cout << "  Outer radius and halfZ considering this: " << outerR << ", " << halfZ_out << std::endl;
@@ -142,9 +142,9 @@ static Ref_t create_detector(Detector& description, xml_h e, SensitiveDetector s
   double innerR_sector = innerR + Cframe_thick;
   double outerR_sector = (innerR_sector + crystal_thick + back_space) / cos(dphi_sec / 2.);
   ;
-  halfZ_out = outerR_sector * cos(dphi_sec / 2.) / tan(atan(innerR_sector / halfZ) - module_tilt_rad);
+  halfZ_out = outerR_sector * cos(dphi_sec / 2.) / tan(atan(innerR_sector / halfZ) - module_tilt);
   std::cout << "  halfZ out = " << outerR_sector * cos(dphi_sec / 2.) << " / tan("
-            << atan(innerR_sector / halfZ) - module_tilt_rad << ") = " << halfZ_out << std::endl;
+            << atan(innerR_sector / halfZ) - module_tilt << ") = " << halfZ_out << std::endl;
 
   // Sector inner and outer width
   double inner_width_neg = fabs(tmp_slope1 * innerR_sector + tmp_intercept1);
@@ -179,8 +179,8 @@ static Ref_t create_detector(Detector& description, xml_h e, SensitiveDetector s
 
     double theta_min_module = theta_min + iz * theta_module;
     double theta_max_module = theta_min_module + theta_module;
-    double tilt_min = theta_min_module < M_PI / 2. ? -module_tilt * M_PI / 180. : module_tilt * M_PI / 180.;
-    double tilt_max = theta_max_module < M_PI / 2. ? -module_tilt * M_PI / 180. : module_tilt * M_PI / 180.;
+    double tilt_min = theta_min_module < M_PI / 2. ? -module_tilt : module_tilt;
+    double tilt_max = theta_max_module < M_PI / 2. ? -module_tilt : module_tilt;
     double tilt_min_local = atan((outerR_sector * cos(dphi_sec / 2.) - innerR_sector) /
                                  (outerR_sector * cos(dphi_sec / 2.) / tan(theta_min_module + tilt_min) -
                                   innerR_sector / tan(theta_min_module)));
