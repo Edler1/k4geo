@@ -29,7 +29,7 @@ SIM.crossingAngleBoost = 0.0
 SIM.enableDetailedShowerMode = False
 SIM.enableG4GPS = False
 SIM.enableG4Gun = False
-SIM.enableGun = True
+SIM.enableGun = False
 
 ## InputFiles for simulation .stdhep, .slcio, .HEPEvt, .hepevt, .pairs, .hepmc, .hepmc.gz, .hepmc.xz, .hepmc.bz2, .hepmc3, .hepmc3.gz, .hepmc3.xz, .hepmc3.bz2, .hepmc3.tree.root files are supported
 SIM.inputFiles = []
@@ -228,8 +228,8 @@ SIM.filter.filters = {
 SIM.filter.mapDetFilter = {}
 
 ##  default filter for tracking sensitive detectors; this is applied if no other filter is used for a tracker
-# SIM.filter.tracker = "edep1kev"
-SIM.filter.tracker = "edep0"
+SIM.filter.tracker = "edep1kev"
+# SIM.filter.tracker = "edep0"
 
 
 ################################################################################
