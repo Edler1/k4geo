@@ -134,9 +134,9 @@ namespace sim {
 
     auto cellID = m_segmentation->cellID(glob, glob, VolID);
     auto hitpos_dd4hep = m_segmentation->position(cellID); // in cm
-    G4ThreeVector HitCellPos(hitpos_dd4hep.x() * dd4hep::centimeter / dd4hep::millimeter,
-                             hitpos_dd4hep.y() * dd4hep::centimeter / dd4hep::millimeter,
-                             hitpos_dd4hep.z() * dd4hep::centimeter / dd4hep::millimeter);
+    G4ThreeVector HitCellPos(hitpos_dd4hep.x() / dd4hep::millimeter,
+                             hitpos_dd4hep.y() / dd4hep::millimeter,
+                             hitpos_dd4hep.z() / dd4hep::millimeter);
 
     Geant4HitCollection* rawColl = collection(m_userData.rawCollectionID);
     const G4double rawStepE = aStep->GetTotalEnergyDeposit();
