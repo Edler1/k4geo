@@ -296,7 +296,7 @@ SIM.guineapig.particlesPerEvent = "-1"
 ################################################################################
 
 ##  direction of the particle gun, 3 vector
-SIM.gun.direction = (0, 1, 0)
+SIM.gun.direction = (0.1, 1.0, 0.1)
 
 ## choose the distribution of the random direction for theta
 ##
