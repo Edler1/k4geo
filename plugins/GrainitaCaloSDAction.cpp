@@ -191,7 +191,7 @@ namespace sim {
       cellIDvec.push_back(id);
       // Unit conversion from cm to mm.
       cellPosVec.push_back(
-          G4ThreeVector(pos.X / dd4hep::millimeter, pos.Y / dd4hep::millimeter, pos.Z / dd4hep::millimeter));
+          G4ThreeVector(pos.X() / dd4hep::millimeter, pos.Y() / dd4hep::millimeter, pos.Z() / dd4hep::millimeter));
     };
 
     addCell(cellID);

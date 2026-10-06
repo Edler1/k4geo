@@ -39,7 +39,7 @@ static Ref_t create_detector(Detector& description, xml_h e, SensitiveDetector s
 
   auto Cframe_thick = description.constant<double>("FrameThickness");
   auto Cseg_thick = description.constant<double>("SegThickness");
-  auto module_tilt = description.constant<double>("ModuleTiltAngle"); 
+  auto module_tilt = description.constant<double>("ModuleTiltAngle");
 
   // auto fiber_r = description.constant<double>("FiberRadius");
   // auto cladding_thick = description.constant<double>("CladdingThickness");
@@ -90,8 +90,8 @@ static Ref_t create_detector(Detector& description, xml_h e, SensitiveDetector s
   double shift_phi_pos =
       fabs(fabs(tmp_slope2 * outerR * cos(dphi_sec / 2.) + tmp_intercept2) - outerR * sin(dphi_sec / 2.));
 
-  std::cout << "-- Consider a tilt angle in phi to avoid pointing cracks. Tilt angle (in deg): " << module_tilt*180./TMath::Pi()
-            << ", in rad: " << module_tilt << std::endl;
+  std::cout << "-- Consider a tilt angle in phi to avoid pointing cracks. Tilt angle (in deg): "
+            << module_tilt * 180. / TMath::Pi() << ", in rad: " << module_tilt << std::endl;
   std::cout << "Input vars: Rin " << innerR << ", Rout " << outerR << ", phi " << dphi_sec / 2. << ", delta "
             << module_tilt << std::endl;
   std::cout << "  Calculate the new boundary lines: " << std::endl;
@@ -130,7 +130,7 @@ static Ref_t create_detector(Detector& description, xml_h e, SensitiveDetector s
   // ======== Define a sector (backspace is included in sector)======== //
   double innerR_sector = innerR + Cframe_thick;
   double outerR_sector = (innerR_sector + crystal_thick + back_space) / cos(dphi_sec / 2.);
-  
+
   halfZ_out = outerR_sector * cos(dphi_sec / 2.) / tan(atan(innerR_sector / halfZ) - module_tilt);
   std::cout << "  halfZ out = " << outerR_sector * cos(dphi_sec / 2.) << " / tan("
             << atan(innerR_sector / halfZ) - module_tilt << ") = " << halfZ_out << std::endl;
