@@ -24,16 +24,6 @@
     <vis name="OTBarSupportPlateVis" alpha="1.0" r="0.41" g="0.51" b="0.59" showDaughters="true" visible="false"/>
     <vis name="OTBarConnectorVis" alpha="1.0" r="0.0" g="0.0" b="0.0" showDaughters="true" visible="false"/>
 
-    <!-- <vis name="OTBarCoolingPipeVis"       alpha="1.0" r="1.0" g="1.0" b="1.0" showDaughters="true" visible="true"/> -->
-    <!-- <vis name="OTBarCoolingFluidVis"        alpha="1.0" r="0.0" g="0.0" b="1.0" showDaughters="true" visible="true"/> -->
-    <!-- <vis name="OTBarPeripheryVis" alpha="1.0" r="0.0" g="0.6" b="0.0" showDaughters="true" visible="true"/> -->
-    <!-- <vis name="OTBarSensitiveVis" alpha="1.0" r="0.08" g="0.75" b="0.08" showDaughters="true" visible="true"/> -->
-    <!-- <vis name="OTBarCopperVis" alpha="1.0" r="0.0" g="0.0" b="0.0" showDaughters="true" visible="true"/> -->
-    <!-- <vis name="OTBarHDIVis" alpha="1.0" r="1.000" g="0.500" b="0.000" showDaughters="true" visible="true"/> -->
-    <!-- <vis name="OTBarFlexVis" alpha="1.0" r="1.000" g="0.000" b="1.000" showDaughters="true" visible="true"/> -->
-    <!-- <vis name="OTBarSupportPlateVis" alpha="1.0" r="0.41" g="0.51" b="0.59" showDaughters="true" visible="true"/> -->
-    <!-- <vis name="OTBarConnectorVis" alpha="1.0" r="0.0" g="0.0" b="0.0" showDaughters="true" visible="true"/> -->
-
 
     <!-- Grainita ECAL  -->
     <vis name="Invisible"        alpha="0.0" r="0.0" g="0.0"  b="0.0"   showDaughters="false" visible="false"/>
