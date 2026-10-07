@@ -19,6 +19,7 @@
     <constant name="OTBar_nGroupingModules" value="1"/>
 
     <constant name="ECalBarrel_inner_radius" value="2200*mm"/>
+    <constant name="ECalBarrel_outer_radius" value="2650*mm"/>
     <constant name="ECalBarrel_half_length" value="2300*mm"/>
 
     <constant name="Solenoid_coil_half_length"      value="2.0*m"/>

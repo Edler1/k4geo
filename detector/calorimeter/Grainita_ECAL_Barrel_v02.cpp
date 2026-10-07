@@ -7,6 +7,7 @@
 //**************************************************************************
 
 // Includers from DD4hep
+#include "DD4hep/Printout.h"
 #include "DDRec/Vector3D.h"
 #include <DD4hep/DetFactoryHelper.h>
 
@@ -31,6 +32,7 @@ static Ref_t create_detector(Detector& description, xml_h e, SensitiveDetector s
 
   // Detector global size
   auto innerR = description.constant<double>("InnerRadius");
+  auto outerR_ref = description.constant<double>("OuterRadius");
   auto crystal_thick = description.constant<double>("CrystalThickness");
   auto back_space = description.constant<double>("BackSpace");
   auto halfZ = description.constant<double>("HalfZ");
@@ -105,6 +107,10 @@ static Ref_t create_detector(Detector& description, xml_h e, SensitiveDetector s
             << ") " << std::endl;
   outerR = sqrt(pow(outerR * cos(dphi_sec / 2.), 2) + pow((outerR * sin(dphi_sec / 2.) + shift_phi_pos), 2));
   std::cout << "  Outer radius and halfZ considering this: " << outerR << ", " << halfZ_out << std::endl;
+
+  if(outerR > outerR_ref)
+    dd4hep::except("Grainita_ECAL_Barrel_v02", "Calculated outerR (%g) is larger than reference OuterRadius (%g), Exit geometry construction", outerR, outerR_ref);
+
 
   // Create the geometry
   DetElement ECAL(det_name, x_det.id());

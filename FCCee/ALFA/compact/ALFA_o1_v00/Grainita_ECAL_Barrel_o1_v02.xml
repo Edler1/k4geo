@@ -23,6 +23,7 @@
 
     <!-- Global structure -->
     <constant name="InnerRadius"          value="ECalBarrel_inner_radius"/>
+    <constant name="OuterRadius"          value="ECalBarrel_outer_radius"/>
     <constant name="CrystalThickness"     value="40.5*cm"/>
     <constant name="BackSpace"            value="1.8*cm"/>
     <constant name="HalfZ"                value="ECalBarrel_half_length"/>
@@ -35,6 +36,10 @@
     <constant name="ModuleTiltAngle"      value="1.5*deg"/>
 
     <!-- Cell -->
+    <!-- Segmentation to achieve readout granularity of 7 mm in frout of ECAL barrel surface.
+    It corresponds to AngularGranularity = 3.2 mrad
+    Two longitudinal segmentations are achieved from short-long fiber structure.  -->
+    <constant name="AngularGranularity"   value="3.2*mrad"/>   
     <constant name="rho0"                 value="FrameThickness"/>   
     <constant name="rho1"                 value="FrameThickness + CrystalThickness/5"/>   
     <constant name="rho2"                 value="FrameThickness + CrystalThickness+10*mm"/>   
@@ -55,14 +60,11 @@
   </detectors>
 
 
-  <!-- Segmentation to achieve readout granularity of 7 mm in frout of ECAL barrel surface.
-  It corresponds to deltaPhi = deltaTheta = 3.2 mrad, so phi_bins = 2pi/3.2mrad = 1975. 
-  Two longitudinal segmentations are achieved from short-long fiber structure.  -->
   <readouts>
     <readout name="GrainitaEcalBarrelRO">
       <segmentation type="FCCSWGridRhoPhiTheta_k4geo"
-              phi_bins="1975"
-              grid_size_theta="0.0032"
+              phi_bins="2*pi/AngularGranularity"
+              grid_size_theta="AngularGranularity"
               rho_bins="rho0 rho1 rho2"
               rho_bin_count="2"
               min_theta="atan((InnerRadius+FrameThickness)/HalfZ)"
