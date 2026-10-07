@@ -145,7 +145,7 @@ SIM.action.mapActions = {
             "responseFuncIntersect": 0.206,
             "responseFuncX0": 0.856,
             "responseFuncAttLength": 3.4,
-            "neighborCellSize": 5,
+            "neighborRadius": 3,
             "fiberAttenuationLength": 1e7,
             "outerRadius": 2645,
         },

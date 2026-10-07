@@ -141,15 +141,22 @@ namespace DDSegmentation {
 
   // overrides the DDSegmentation::Segmentation::neighbours method
   void FCCSWGridRhoPhiTheta_k4geo::neighbours(const CellID& cID, std::set<CellID>& neighbours) const {
+    neighboursInWindow(cID, neighbours, 1, 1, 1);
+  }
+
+  void FCCSWGridRhoPhiTheta_k4geo::neighboursInWindow(const CellID& cID, std::set<CellID>& neighbours, int rPhi,
+                                                      int rTheta, int rRho) const {
     const int phiBin = static_cast<int>(decoder()->get(cID, m_phiIndex));
     const int thetaBin = static_cast<int>(decoder()->get(cID, m_thetaIndex));
     const int rhoBin = static_cast<int>(decoder()->get(cID, m_rhoIndex));
 
-    auto withBin = [&](int fieldIndex, int bin) {
+    auto insertWithBin = [&](int fieldIndex, int bin) {
       CellID neighbour = cID;
       decoder()->set(neighbour, fieldIndex, bin);
       clearExtraFields(neighbour);
-      return neighbour;
+      // A phi window wider than the full circle wraps back onto the cell itself.
+      if (neighbour != cID)
+        neighbours.insert(neighbour);
     };
 
     // phiFromXYZ() uses atan2(), hence phi bins are generally signed.  In
@@ -160,8 +167,10 @@ namespace DDSegmentation {
         const int relativeBin = bin - firstPhiBin;
         return firstPhiBin + (relativeBin % phiBins() + phiBins()) % phiBins();
       };
-      neighbours.insert(withBin(m_phiIndex, wrapPhi(phiBin - 1)));
-      neighbours.insert(withBin(m_phiIndex, wrapPhi(phiBin + 1)));
+      for (int d = 1; d <= rPhi; ++d) {
+        insertWithBin(m_phiIndex, wrapPhi(phiBin - d));
+        insertWithBin(m_phiIndex, wrapPhi(phiBin + d));
+      }
     }
 
     // Theta is not periodic.  Use the bins reached by points at the detector
@@ -169,9 +178,11 @@ namespace DDSegmentation {
     // cells can have centres just outside the boundary.
     const int minThetaBin = firstThetaBin();
     const int maxThetaBin = lastThetaBin();
-    for (const int candidate : {thetaBin - 1, thetaBin + 1}) {
-      if (candidate >= minThetaBin && candidate <= maxThetaBin)
-        neighbours.insert(withBin(m_thetaIndex, candidate));
+    for (int d = 1; d <= rTheta; ++d) {
+      for (const int candidate : {thetaBin - d, thetaBin + d}) {
+        if (candidate >= minThetaBin && candidate <= maxThetaBin)
+          insertWithBin(m_thetaIndex, candidate);
+      }
     }
 
     // Non-uniform rho bins define their count directly.  A uniform grid needs
@@ -184,9 +195,11 @@ namespace DDSegmentation {
       maxRhoBin = std::min(static_cast<int>(m_rhoBins.size()) - 2, maxRhoBin);
     else if (m_rhoBinCount > 0)
       maxRhoBin = std::min(m_rhoBinCount - 1, maxRhoBin);
-    for (const int candidate : {rhoBin - 1, rhoBin + 1}) {
-      if (candidate >= minRhoBin && candidate <= maxRhoBin)
-        neighbours.insert(withBin(m_rhoIndex, candidate));
+    for (int d = 1; d <= rRho; ++d) {
+      for (const int candidate : {rhoBin - d, rhoBin + d}) {
+        if (candidate >= minRhoBin && candidate <= maxRhoBin)
+          insertWithBin(m_rhoIndex, candidate);
+      }
     }
   }
 

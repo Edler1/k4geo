@@ -108,9 +108,10 @@ static Ref_t create_detector(Detector& description, xml_h e, SensitiveDetector s
   outerR = sqrt(pow(outerR * cos(dphi_sec / 2.), 2) + pow((outerR * sin(dphi_sec / 2.) + shift_phi_pos), 2));
   std::cout << "  Outer radius and halfZ considering this: " << outerR << ", " << halfZ_out << std::endl;
 
-  if(outerR > outerR_ref)
-    dd4hep::except("Grainita_ECAL_Barrel_v02", "Calculated outerR (%g) is larger than reference OuterRadius (%g), Exit geometry construction", outerR, outerR_ref);
-
+  if (outerR > outerR_ref)
+    dd4hep::except("Grainita_ECAL_Barrel_v02",
+                   "Calculated outerR (%g) is larger than reference OuterRadius (%g), Exit geometry construction",
+                   outerR, outerR_ref);
 
   // Create the geometry
   DetElement ECAL(det_name, x_det.id());

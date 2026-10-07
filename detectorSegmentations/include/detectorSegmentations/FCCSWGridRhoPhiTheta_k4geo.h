@@ -40,9 +40,16 @@ namespace DDSegmentation {
                           const VolumeID& aVolumeID) const override;
 
     /** Add the face-sharing neighbours in rho, phi and theta.
-     *  Phi neighbours wrap around at 2 pi; rho and theta do not.
+     *  Equivalent to neighboursInWindow(cellID, neighbours, 1, 1, 1).
      */
     virtual void neighbours(const CellID& cellID, std::set<CellID>& neighbours) const override;
+
+    /** Add the cells within a cross-shaped window around cellID: up to rPhi,
+     *  rTheta and rRho bins away along one axis at a time (no diagonals).
+     *  Phi neighbours wrap around at 2 pi; rho and theta do not.  The cell
+     *  itself is never added.
+     */
+    void neighboursInWindow(const CellID& cellID, std::set<CellID>& neighbours, int rPhi, int rTheta, int rRho) const;
 
     /// First/last theta bin inside the physical coverage [min_theta, max_theta] (and the theta field range).
     int firstThetaBin() const;

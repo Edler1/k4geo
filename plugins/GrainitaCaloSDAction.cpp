@@ -27,7 +27,6 @@
 #include "DDG4/Geant4GeneratorAction.h"
 #include "DDG4/Geant4Mapping.h"
 #include "DDG4/Geant4SensDetAction.inl"
-#include "detectorSegmentations/FCCSWGridPhiTheta_k4geo.h"
 #include "detectorSegmentations/FCCSWGridRhoPhiTheta_k4geo.h"
 
 #include "G4EmProcessSubType.hh"
@@ -37,8 +36,8 @@
 #include "G4VProcess.hh"
 #include <algorithm>
 #include <cmath>
-#include <limits>
 #include <numeric>
+#include <set>
 #include <vector>
 
 // #define DEBUG
@@ -59,7 +58,7 @@ namespace sim {
     declareProperty("responseFuncX0", m_userData.x0);
     declareProperty("responseFuncAttLength", m_userData.AttLength);
     declareProperty("responseFuncNorm", m_userData.norm);
-    declareProperty("neighborCellSize", m_userData.neighborCellSize);
+    declareProperty("neighborRadius", m_userData.neighborRadius);
     declareProperty("fiberAttenuationLength", m_userData.fiberAttenuationLength);
     declareProperty("outerRadius", m_userData.outerRadius);
 
@@ -77,9 +76,18 @@ namespace sim {
   }
 
   // Function template specialization of Geant4SensitiveAction class.
-  // Define collections created by this sensitivie action object
+  // Define collections created by this sensitivie action object.
+  // Also validates the configuration: unlike initialize(), this runs after the steering properties are applied.
   template <>
   void Geant4SensitiveAction<GrainitaCaloSDData>::defineCollections() {
+    m_userData.segmentation =
+        dynamic_cast<const dd4hep::DDSegmentation::FCCSWGridRhoPhiTheta_k4geo*>(m_segmentation->segmentation);
+    if (!m_userData.segmentation)
+      except("GrainitaCaloSDAction requires the FCCSWGridRhoPhiTheta_k4geo segmentation, got %s.",
+             m_segmentation.type().c_str());
+    if (m_userData.neighborRadius < 0)
+      except("neighborRadius must be non-negative, got %d.", m_userData.neighborRadius);
+
     m_collectionID = defineCollection<Geant4Calorimeter::Hit>(m_collectionName);
     m_userData.rawCollectionID = defineCollection<Geant4Calorimeter::Hit>(m_userData.rawCollectionName);
   }
@@ -113,12 +121,11 @@ namespace sim {
       return true;
     }
 
-    // auto decoder = m_sensitive.readout().idSpec().decoder();
-    auto decoder = m_segmentation->decoder();
     auto VolID = volumeID(aStep);
     m_userData.norm = 1. / std::exp(-1. * m_userData.x0 / m_userData.AttLength);
 
 #ifdef DEBUG
+    auto decoder = m_segmentation->decoder();
     auto SystemID = decoder->get(VolID, "system");
     auto StaveID = decoder->get(VolID, "stave");
     auto SectorID = decoder->get(VolID, "sector");
@@ -159,29 +166,6 @@ namespace sim {
     rawContrib.z = global.z();
     rawHit->truth.emplace_back(rawContrib);
 
-    // auto modularSeg = dynamic_cast<const
-    // dd4hep::DDSegmentation::FCCSWModularGridRhoPhiTheta_k4geo*>(m_segmentation->segmentation);
-    auto phiThetaSeg =
-        dynamic_cast<const dd4hep::DDSegmentation::FCCSWGridPhiTheta_k4geo*>(m_segmentation->segmentation);
-    const int phiIndex = decoder->index("phi");
-    const int thetaIndex = decoder->index("theta");
-    const int phiBins = phiThetaSeg ? phiThetaSeg->phiBins() : 0;
-    // cellID() encodes atan2(phi) in the periodic interval whose first bin contains -pi.
-    const int firstPhiID =
-        phiThetaSeg
-            ? static_cast<int>(std::floor((-M_PI + 0.5 * phiThetaSeg->gridSizePhi() - phiThetaSeg->offsetPhi()) /
-                                          phiThetaSeg->gridSizePhi()))
-            : 0;
-    // Theta is not periodic: restrict neighbours to the physical theta coverage of the segmentation.
-    auto rhoPhiThetaSeg =
-        dynamic_cast<const dd4hep::DDSegmentation::FCCSWGridRhoPhiTheta_k4geo*>(m_segmentation->segmentation);
-    const int firstThetaID = rhoPhiThetaSeg ? rhoPhiThetaSeg->firstThetaBin() : std::numeric_limits<int>::min();
-    const int lastThetaID = rhoPhiThetaSeg ? rhoPhiThetaSeg->lastThetaBin() : std::numeric_limits<int>::max();
-    const int currentPhiID = static_cast<int>(decoder->get(cellID, phiIndex));
-    const int currentThetaID = static_cast<int>(decoder->get(cellID, thetaIndex));
-    const int neighborSize = std::max(1, m_userData.neighborCellSize);
-    const int neighborRadius = neighborSize / 2;
-
     std::vector<CellID> cellIDvec;
     std::vector<G4ThreeVector> cellPosVec;
     std::vector<G4double> responseVec;
@@ -194,35 +178,14 @@ namespace sim {
           G4ThreeVector(pos.X() / dd4hep::millimeter, pos.Y() / dd4hep::millimeter, pos.Z() / dd4hep::millimeter));
     };
 
+    // The hit cell must stay first: only it receives the truth contribution below.
     addCell(cellID);
     if (m_userData.useLightResponseFunction) {
-      for (int dPhi = -neighborRadius; dPhi <= neighborRadius; ++dPhi) {
-        for (int dTheta = -neighborRadius; dTheta <= neighborRadius; ++dTheta) {
-          if (dPhi == 0 && dTheta == 0) {
-            continue;
-          }
-
-          int neighborPhiID = currentPhiID + dPhi;
-          if (phiBins > 0) {
-            const int relativePhiID = neighborPhiID - firstPhiID;
-            neighborPhiID = firstPhiID + (relativePhiID % phiBins + phiBins) % phiBins;
-          } else {
-            std::cout << "Error: phiBins is not well defined: " << phiBins
-                      << ". Cannot apply periodic boundary conditions." << std::endl;
-            continue;
-          }
-
-          const int neighborThetaID = currentThetaID + dTheta;
-          if (neighborThetaID < firstThetaID || neighborThetaID > lastThetaID) {
-            continue;
-          }
-
-          CellID neighborCellID = cellID;
-          decoder->set(neighborCellID, phiIndex, neighborPhiID);
-          decoder->set(neighborCellID, thetaIndex, neighborThetaID);
-          addCell(neighborCellID);
-        }
-      }
+      std::set<CellID> neighbourIDs;
+      m_userData.segmentation->neighboursInWindow(cellID, neighbourIDs, m_userData.neighborRadius,
+                                                  m_userData.neighborRadius, 0);
+      for (const CellID id : neighbourIDs)
+        addCell(id);
     }
 
     // Note: keep cell id for future development: modular segmentation.
